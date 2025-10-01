@@ -5,7 +5,7 @@ class MoviesController < ApplicationController
   end
 
   def index
-<<<<<<< HEAD
+
     # for the Part 1 & 2 UI
     @all_ratings     = Movie.all_ratings
     @ratings_to_show = (params[:ratings]&.keys || @all_ratings)
@@ -17,11 +17,11 @@ class MoviesController < ApplicationController
     # query: filter first, then sort (DB does the work)
     @movies = Movie.with_ratings(@ratings_to_show)
     @movies = @movies.order(@sort_by) if @sort_by.present?
-=======
+
     @all_ratings     = Movie.all_ratings
     @ratings_to_show = (params[:ratings]&.keys || @all_ratings)
     @movies          = Movie.with_ratings(@ratings_to_show)
->>>>>>> heroku/master
+
   end
   
 
