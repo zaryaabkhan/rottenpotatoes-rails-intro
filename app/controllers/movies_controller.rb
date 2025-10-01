@@ -1,18 +1,24 @@
 class MoviesController < ApplicationController
-
   def show
-    id = params[:id] # retrieve movie ID from URI route
-    @movie = Movie.find(id) # look up movie by unique ID
-    # will render app/views/movies/show.<extension> by default
+    id = params[:id]
+    @movie = Movie.find(id)
   end
 
   def index
-    @movies = Movie.all
+    # for the Part 1 & 2 UI
+    @all_ratings     = Movie.all_ratings
+    @ratings_to_show = (params[:ratings]&.keys || @all_ratings)
+
+    # Part 2: optional sort by title or release_date
+    allowed = %w[title release_date]
+    @sort_by = params[:sort_by].presence_in(allowed) || "title"
+
+    # query: filter first, then sort (DB does the work)
+    @movies = Movie.with_ratings(@ratings_to_show)
+    @movies = @movies.order(@sort_by) if @sort_by.present?
   end
 
-  def new
-    # default: render 'new' template
-  end
+  def new; end
 
   def create
     @movie = Movie.create!(movie_params)
@@ -39,8 +45,7 @@ class MoviesController < ApplicationController
   end
 
   private
-  # Making "internal" methods private is not required, but is a common practice.
-  # This helps make clear which methods respond to requests, and which ones do not.
+
   def movie_params
     params.require(:movie).permit(:title, :rating, :description, :release_date)
   end
