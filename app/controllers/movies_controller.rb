@@ -5,24 +5,29 @@ class MoviesController < ApplicationController
   end
 
   def index
-
-    # for the Part 1 & 2 UI
-    @all_ratings     = Movie.all_ratings
-    @ratings_to_show = (params[:ratings]&.keys || @all_ratings)
-
-    # Part 2: optional sort by title or release_date
-    allowed = %w[title release_date]
-    @sort_by = params[:sort_by].presence_in(allowed) || "title"
-
-    # query: filter first, then sort (DB does the work)
+    # If params are given, update session
+    if params[:ratings] || params[:sort_by]
+      session[:ratings] = params[:ratings] if params[:ratings]
+      session[:sort_by] = params[:sort_by] if params[:sort_by]
+    end
+  
+    # If no params, fall back to session
+    @ratings_to_show = if params[:ratings]
+                         params[:ratings].keys
+                       elsif session[:ratings]
+                         session[:ratings].keys
+                       else
+                         Movie.all_ratings
+                       end
+  
+    @sort_by = params[:sort_by] || session[:sort_by]
+  
+    # Always fetch the movies with remembered settings
+    @all_ratings = Movie.all_ratings
     @movies = Movie.with_ratings(@ratings_to_show)
     @movies = @movies.order(@sort_by) if @sort_by.present?
-
-    @all_ratings     = Movie.all_ratings
-    @ratings_to_show = (params[:ratings]&.keys || @all_ratings)
-    @movies          = Movie.with_ratings(@ratings_to_show)
-
   end
+  
   
 
   def new; end
